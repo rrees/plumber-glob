@@ -4,7 +4,7 @@
   "description": "File globbing operation for Plumber pipelines",
   "main": "index",
   "dependencies": {
-    "plumber": "~0.1.1",
+    "plumber": "~0.1.22",
     "q": "~0.9.7",
     "flatten": "0.0.1"
   },

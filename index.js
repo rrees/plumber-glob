@@ -19,7 +19,7 @@ function globOperation(mapper) {
         var fileList = flatten([].slice.call(arguments)).map(mapper);
         return appendResources(function(supervisor) {
             var glob = supervisor.glob.bind(supervisor);
-            return q.all(fileList.map(glob)).then(flatten);
+            return q.all(fileList.map(glob)).then(flatten).then(q.all);
         });
     };
 
