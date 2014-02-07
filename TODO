@@ -1,0 +1,11 @@
+* Allow matching exact files, and throw error when not found
+  [ glob.file("main.js") ]
+
+* Allow matching exact directories, returning all files within, and
+  throw error when not found
+  [ glob.directory("src") ]
+
+* Allow excluding matches
+  [ glob("*.js").exclude("*.min.js") ]
+  by symmetry
+  [ glob("*.js") == glob.match("*.min.js") ]
