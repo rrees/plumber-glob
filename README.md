@@ -1,4 +1,4 @@
-plumber-glob
+plumber-glob [![Build Status](https://travis-ci.org/plumberjs/plumber-glob.png?branch=master)](https://travis-ci.org/plumberjs/plumber-glob)
 ============
 
 File globbing operation for [Plumber](https://github.com/plumberjs/plumber) pipelines.
