@@ -1,0 +1,1 @@
+{"version":3,"file":"concatenated.js","mappings":"AAAA;AACA;ACDA;AACA;AACA;AACA;AACA","sources":["../1.js","../2.js"],"sourcesContent":["/* source */\nvar answer = 42;","var added = addOne(answer);\nfunction addOne(number) {\n  return number + 1;\n}\n"],"names":[]}
