@@ -5,7 +5,6 @@
   "main": "index",
   "dependencies": {
     "plumber": "~0.2.4",
-    "q": "~0.9.7",
     "flatten": "0.0.1",
     "highland": "*"
   },
