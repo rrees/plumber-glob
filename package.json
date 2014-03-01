@@ -4,9 +4,8 @@
   "description": "File globbing operation for Plumber pipelines",
   "main": "index",
   "dependencies": {
-    "plumber": "~0.2.4",
-    "flatten": "0.0.1",
-    "highland": "*"
+    "plumber": "~0.3.0",
+    "highland": "~0.16.2"
   },
   "devDependencies": {
     "mocha": "~1.16.2",
