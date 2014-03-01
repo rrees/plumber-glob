@@ -3,7 +3,6 @@ var Supervisor = require('plumber').Supervisor;
 
 var highland = require('highland');
 var path = require('path');
-var flatten = require('flatten');
 
 
 function identity(x){ return x; }
@@ -18,12 +17,12 @@ function compose(f, g) {
 
 function globOperation(mapper) {
     function glob(/* files... */) {
-        var fileList = flatten([].slice.call(arguments)).map(mapper);
+        var fileList = highland([].slice.call(arguments)).flatten().map(mapper);
         // FIXME: do we really need the supervisor then?
         var supervisor = new Supervisor();
         return operation(function(resources) {
             var glob = supervisor.glob.bind(supervisor);
-            var globbedResources = highland(fileList).flatMap(glob);
+            var globbedResources = fileList.flatMap(glob);
             return resources.concat(globbedResources);
         });
     };
