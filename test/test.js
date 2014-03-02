@@ -33,7 +33,7 @@ describe('glob', function() {
 
     it('should return a promise of resources', function() {
       var globbedResources = glob('test/files/file-*.js')([], supervisor);
-      return globbedResources.then(function(resources) {
+      return globbedResources.toArray(function(resources) {
         resources.length.should.equal(2);
         resources[0].filename().should.equal('file-1.js');
         resources[0].data().should.equal('var x = 42;\n');
@@ -86,7 +86,7 @@ describe('glob', function() {
     it('should match resources within the directories', function() {
       var globWithin = glob.within('test').within('files');
       var globbedResources = globWithin('file-*.js')([], supervisor);
-      return globbedResources.then(function(resources) {
+      return globbedResources.toArray(function(resources) {
         resources.length.should.equal(2);
       });
     });
