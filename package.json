@@ -4,8 +4,8 @@
   "description": "File globbing operation for Plumber pipelines",
   "main": "index",
   "dependencies": {
-    "plumber": "~0.3.0",
-    "highland": "~0.16.2"
+    "plumber": "git://github.com/plumberjs/plumber.git#highland",
+    "highland": "~1.16.2"
   },
   "devDependencies": {
     "mocha": "~1.16.2",
