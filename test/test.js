@@ -1,11 +1,7 @@
 var chai = require('chai');
 var should = chai.should();
-var chaiAsPromised = require("chai-as-promised");
 
-chai.use(chaiAsPromised);
-
-require('mocha-as-promised')();
-
+var runOperation = require('plumber-util-test').runOperation;
 
 var Resource = require('plumber').Resource;
 var Supervisor = require('plumber/lib/util/supervisor');
@@ -32,7 +28,7 @@ describe('glob', function() {
     });
 
     it('should return a promise of resources', function() {
-      var globbedResources = glob('test/files/file-*.js')([], supervisor);
+      var globbedResources = runOperation(glob('test/files/file-*.js'), []).resources;
       return globbedResources.toArray(function(resources) {
         resources.length.should.equal(2);
         resources[0].filename().should.equal('file-1.js');
@@ -47,8 +43,8 @@ describe('glob', function() {
     });
 
     it('should return a promise of resources with their source map', function() {
-      var globbedResources = glob('test/files/concatenated.js')([], supervisor);
-      return globbedResources.then(function(resources) {
+      var globbedResources = runOperation(glob('test/files/concatenated.js'), []).resources;
+      return globbedResources.toArray(function(resources) {
         resources.length.should.equal(1);
         resources[0].filename().should.equal('concatenated.js');
         resources[0].data().should.equal('/* source */\nvar answer = 42;\nvar added = addOne(answer);\nfunction addOne(number) {\n  return number + 1;\n}\n');
@@ -60,8 +56,8 @@ describe('glob', function() {
 
     it('should pass through any input resources and append the globbed resources', function() {
       var inputRes = new Resource();
-      var globbedResources = glob('test/files/file-*.js')([inputRes], supervisor);
-      return globbedResources.then(function(resources) {
+      var globbedResources = runOperation(glob('test/files/file-*.js'), [inputRes]).resources;
+      return globbedResources.toArray(function(resources) {
         resources.length.should.equal(3);
         resources[0].should.equal(inputRes);
       });
@@ -85,7 +81,7 @@ describe('glob', function() {
 
     it('should match resources within the directories', function() {
       var globWithin = glob.within('test').within('files');
-      var globbedResources = globWithin('file-*.js')([], supervisor);
+      var globbedResources = runOperation(globWithin('file-*.js'), []).resources;
       return globbedResources.toArray(function(resources) {
         resources.length.should.equal(2);
       });

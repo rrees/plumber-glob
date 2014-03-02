@@ -8,10 +8,9 @@
     "highland": "~1.16.2"
   },
   "devDependencies": {
+    "plumber-util-test": "~0.3.0",
     "mocha": "~1.16.2",
-    "chai": "~1.8.1",
-    "mocha-as-promised": "~2.0.0",
-    "chai-as-promised": "~4.1.0"
+    "chai": "~1.8.1"
   },
   "scripts": {
     "test": "node_modules/.bin/mocha"
