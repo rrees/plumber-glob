@@ -27,7 +27,7 @@ describe('glob', function() {
       glob('files/*.js').should.be.a('function');
     });
 
-    it('should return a promise of resources', function() {
+    it('should return a promise of resources', function(done) {
       var globbedResources = runOperation(glob('test/files/file-*.js'), []).resources;
       return globbedResources.toArray(function(resources) {
         resources.length.should.equal(2);
@@ -39,10 +39,11 @@ describe('glob', function() {
         resources[1].data().should.equal('function nothing() {\n}\n');
         resources[1].type().should.equal('javascript');
         should.not.exist(resources[1].sourceMap());
+        done();
       });
     });
 
-    it('should return a promise of resources with their source map', function() {
+    it('should return a promise of resources with their source map', function(done) {
       var globbedResources = runOperation(glob('test/files/concatenated.js'), []).resources;
       return globbedResources.toArray(function(resources) {
         resources.length.should.equal(1);
@@ -51,15 +52,17 @@ describe('glob', function() {
         resources[0].type().should.equal('javascript');
         resources[0].sourceMap().should.be.an('object');
         resources[0].sourceMap().toString().should.deep.equal('{"version":3,"file":"concatenated.js","mappings":"AAAA;AACA;ACDA;AACA;AACA;AACA;AACA","sources":["../1.js","../2.js"],"sourcesContent":["/* source */\\nvar answer = 42;","var added = addOne(answer);\\nfunction addOne(number) {\\n  return number + 1;\\n}\\n"],"names":[]}');
+        done();
       });
     });
 
-    it('should pass through any input resources and append the globbed resources', function() {
+    it('should pass through any input resources and append the globbed resources', function(done) {
       var inputRes = new Resource();
       var globbedResources = runOperation(glob('test/files/file-*.js'), [inputRes]).resources;
       return globbedResources.toArray(function(resources) {
         resources.length.should.equal(3);
         resources[0].should.equal(inputRes);
+        done();
       });
     });
 
@@ -79,11 +82,12 @@ describe('glob', function() {
       glob.within('test').within.should.be.a('function');
     });
 
-    it('should match resources within the directories', function() {
+    it('should match resources within the directories', function(done) {
       var globWithin = glob.within('test').within('files');
       var globbedResources = runOperation(globWithin('file-*.js'), []).resources;
       return globbedResources.toArray(function(resources) {
         resources.length.should.equal(2);
+        done();
       });
     });
   });
