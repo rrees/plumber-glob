@@ -22,7 +22,7 @@ function globOperation(mapper) {
         var supervisor = new Supervisor();
         return operation(function(resources) {
             var glob = supervisor.glob.bind(supervisor);
-            var globbedResources = fileList.flatMap(glob);
+            var globbedResources = fileList.map(glob).merge();
             return resources.concat(globbedResources);
         });
     };
