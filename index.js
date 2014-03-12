@@ -15,6 +15,16 @@ function compose(f, g) {
     };
 }
 
+function uniqueByPath() {
+    var memo = {};
+    return function(resource) {
+        var resPath = resource.path().absolute();
+        var seen = memo[resPath];
+        memo[resPath] = true;
+        return ! seen;
+    };
+}
+
 function globOperation(mapper) {
     function glob(/* files... */) {
         var fileList = highland([].slice.call(arguments)).flatten().map(mapper);
@@ -22,7 +32,7 @@ function globOperation(mapper) {
         var supervisor = new Supervisor();
         return operation(function(resources) {
             var glob = supervisor.glob.bind(supervisor);
-            var globbedResources = fileList.map(glob).merge();
+            var globbedResources = fileList.map(glob).merge().filter(uniqueByPath());
             return resources.concat(globbedResources);
         });
     };

@@ -27,7 +27,7 @@ describe('glob', function() {
       glob('files/*.js').should.be.a('function');
     });
 
-    it('should return a promise of resources', function(done) {
+    it('should return all matched resources', function(done) {
       var globbedResources = runOperation(glob('test/files/file-*.js'), []).resources;
       return globbedResources.toArray(function(resources) {
         resources.length.should.equal(2);
@@ -43,7 +43,7 @@ describe('glob', function() {
       });
     });
 
-    it('should return a promise of resources with their source map', function(done) {
+    it('should return all matched resources with their source map', function(done) {
       var globbedResources = runOperation(glob('test/files/concatenated.js'), []).resources;
       return globbedResources.toArray(function(resources) {
         resources.length.should.equal(1);
@@ -62,6 +62,39 @@ describe('glob', function() {
       return globbedResources.toArray(function(resources) {
         resources.length.should.equal(3);
         resources[0].should.equal(inputRes);
+        done();
+      });
+    });
+
+    it('should return resources matching all arguments', function(done) {
+      var globbedResources = runOperation(glob(
+          'test/files/file-1.js',
+          'test/files/file-2.js'
+      ), []).resources;
+      return globbedResources.toArray(function(resources) {
+        resources.length.should.equal(2);
+        done();
+      });
+    });
+
+    it('should return resources matching array arguments', function(done) {
+      var globbedResources = runOperation(glob([
+          'test/files/file-1.js',
+          'test/files/file-2.js'
+      ]), []).resources;
+      return globbedResources.toArray(function(resources) {
+        resources.length.should.equal(2);
+        done();
+      });
+    });
+
+    it('should return each matched resource only once', function(done) {
+      var globbedResources = runOperation(glob(
+          'test/files/file-1.js',
+          'test/files/file-1.js'
+      ), []).resources;
+      return globbedResources.toArray(function(resources) {
+        resources.length.should.equal(1);
         done();
       });
     });
