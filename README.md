@@ -19,7 +19,7 @@ File globbing operation for [Plumber](https://github.com/plumberjs/plumber) pipe
 
 ## API
 
-### `glob(patterns...)`
+### `glob(patterns...)` or `glob.pattern(patterns...)`
 
 Returns resources for all files matched by the list of patterns.
 

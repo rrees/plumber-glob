@@ -26,13 +26,18 @@ function uniqueByPath() {
 }
 
 function globOperation(mapper) {
-    function glob(/* files... */) {
-        var fileList = highland([].slice.call(arguments)).flatten().map(mapper);
+    // The glob function is an alias for glob.pattern
+    function glob(/* patterns... */) {
+        return glob.pattern.apply(null, arguments);
+    };
+
+    glob.pattern = function(/* patterns... */) {
+        var patternList = highland([].slice.call(arguments)).flatten().map(mapper);
         // FIXME: do we really need the supervisor then?
         var supervisor = new Supervisor();
         return operation(function(resources) {
             var glob = supervisor.glob.bind(supervisor);
-            var globbedResources = fileList.map(glob).merge().filter(uniqueByPath());
+            var globbedResources = patternList.map(glob).merge().filter(uniqueByPath());
             return resources.concat(globbedResources);
         });
     };

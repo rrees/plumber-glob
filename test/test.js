@@ -22,13 +22,13 @@ describe('glob', function() {
   });
 
 
-  describe('#apply', function() {
+  describe('#pattern', function() {
     it('should be a function', function() {
-      glob('files/*.js').should.be.a('function');
+      glob.pattern('files/*.js').should.be.a('function');
     });
 
     it('should return all matched resources', function(done) {
-      var globbedResources = runOperation(glob('test/files/file-*.js'), []).resources;
+      var globbedResources = runOperation(glob.pattern('test/files/file-*.js'), []).resources;
       return globbedResources.toArray(function(resources) {
         resources.length.should.equal(2);
         resources[0].filename().should.equal('file-1.js');
@@ -44,7 +44,7 @@ describe('glob', function() {
     });
 
     it('should return all matched resources with their source map', function(done) {
-      var globbedResources = runOperation(glob('test/files/concatenated.js'), []).resources;
+      var globbedResources = runOperation(glob.pattern('test/files/concatenated.js'), []).resources;
       return globbedResources.toArray(function(resources) {
         resources.length.should.equal(1);
         resources[0].filename().should.equal('concatenated.js');
@@ -58,7 +58,7 @@ describe('glob', function() {
 
     it('should pass through any input resources and append the globbed resources', function(done) {
       var inputRes = new Resource();
-      var globbedResources = runOperation(glob('test/files/file-*.js'), [inputRes]).resources;
+      var globbedResources = runOperation(glob.pattern('test/files/file-*.js'), [inputRes]).resources;
       return globbedResources.toArray(function(resources) {
         resources.length.should.equal(3);
         resources[0].should.equal(inputRes);
@@ -67,7 +67,7 @@ describe('glob', function() {
     });
 
     it('should return resources matching all arguments', function(done) {
-      var globbedResources = runOperation(glob(
+      var globbedResources = runOperation(glob.pattern(
           'test/files/file-1.js',
           'test/files/file-2.js'
       ), []).resources;
@@ -78,7 +78,7 @@ describe('glob', function() {
     });
 
     it('should return resources matching array arguments', function(done) {
-      var globbedResources = runOperation(glob([
+      var globbedResources = runOperation(glob.pattern([
           'test/files/file-1.js',
           'test/files/file-2.js'
       ]), []).resources;
@@ -89,7 +89,7 @@ describe('glob', function() {
     });
 
     it('should return each matched resource only once', function(done) {
-      var globbedResources = runOperation(glob(
+      var globbedResources = runOperation(glob.pattern(
           'test/files/file-1.js',
           'test/files/file-1.js'
       ), []).resources;
@@ -99,6 +99,29 @@ describe('glob', function() {
       });
     });
 
+  });
+
+
+  describe('#apply', function() {
+    it('should be a function', function() {
+      glob('files/*.js').should.be.a('function');
+    });
+
+    it('should return all matched resources like #pattern', function(done) {
+      var globbedResources = runOperation(glob('test/files/file-*.js'), []).resources;
+      return globbedResources.toArray(function(resources) {
+        resources.length.should.equal(2);
+        resources[0].filename().should.equal('file-1.js');
+        resources[0].data().should.equal('var x = 42;\n');
+        resources[0].type().should.equal('javascript');
+        should.not.exist(resources[0].sourceMap());
+        resources[1].filename().should.equal('file-2.js');
+        resources[1].data().should.equal('function nothing() {\n}\n');
+        resources[1].type().should.equal('javascript');
+        should.not.exist(resources[1].sourceMap());
+        done();
+      });
+    });
   });
 
 
