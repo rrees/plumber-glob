@@ -130,6 +130,30 @@ describe('glob', function() {
   });
 
 
+  describe('#within', function() {
+    it('should be a function', function() {
+      glob.within.should.be.a('function');
+    });
+
+    it('should return a glob function', function() {
+      glob.within('test').should.be.a('function');
+    });
+
+    it('should return a glob function with a within function', function() {
+      glob.within('test').within.should.be.a('function');
+    });
+
+    it('should match resources within the directories', function(done) {
+      var globWithin = glob.within('test').within('files');
+      var globbedResources = runOperation(globWithin('file-*.js'), []).resources;
+      return globbedResources.toArray(function(resources) {
+        resources.length.should.equal(2);
+        done();
+      });
+    });
+  });
+
+
   describe('#exclude', function() {
     it('should be a function', function() {
       glob.exclude.should.be.a('function');
@@ -180,29 +204,21 @@ describe('glob', function() {
         done();
       });
     });
-  });
 
+    it('should return a glob that excludes paths from the current within context', function(done) {
+      var excludeGlob = glob.
+          within('test').
+          exclude('files/file-1.js').
+          within('files').
+          exclude('file-2.js');
 
-  describe('#within', function() {
-    it('should be a function', function() {
-      glob.within.should.be.a('function');
-    });
-
-    it('should return a glob function', function() {
-      glob.within('test').should.be.a('function');
-    });
-
-    it('should return a glob function with a within function', function() {
-      glob.within('test').within.should.be.a('function');
-    });
-
-    it('should match resources within the directories', function(done) {
-      var globWithin = glob.within('test').within('files');
-      var globbedResources = runOperation(globWithin('file-*.js'), []).resources;
+      var globbedResources = runOperation(excludeGlob('*.js'), []).resources;
       return globbedResources.toArray(function(resources) {
-        resources.length.should.equal(2);
+        resources.length.should.equal(1);
+        resources[0].filename().should.equal('concatenated.js');
         done();
       });
     });
   });
+
 });
