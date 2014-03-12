@@ -27,6 +27,15 @@ Patterns may include wildcards like `*` or `**` (globstar).
 
 See the [minimatch](https://github.com/isaacs/minimatch) documentation for the full available syntax.
 
+### `glob.exclude(patterns...)`
+
+Returns a new `glob` function that excludes files patched by the patterns.
+
+Example:
+
+    var globNoJs = glob.exclude('*.js');
+    var allButJs = globNoJs("src/*.*");
+
 ### `glob.within(directory)`
 
 Returns a new `glob` function scoped within the given directory.

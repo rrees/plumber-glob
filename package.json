@@ -5,7 +5,9 @@
   "main": "index",
   "dependencies": {
     "plumber": "~0.3.0",
-    "highland": "~1.16.2"
+    "highland": "~1.16.2",
+    "minimatch": "~0.2.14",
+    "flatten": "0.0.1"
   },
   "devDependencies": {
     "plumber-util-test": "~0.3.0",

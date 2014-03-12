@@ -130,6 +130,59 @@ describe('glob', function() {
   });
 
 
+  describe('#exclude', function() {
+    it('should be a function', function() {
+      glob.exclude.should.be.a('function');
+    });
+
+    it('should return a function', function() {
+      glob.exclude('test/files/file-*.js').should.be.a('function');
+    });
+
+    it('should return a glob that excludes paths based on given pattern', function(done) {
+      var excludeGlob = glob.exclude('test/files/file-*.js');
+      var globbedResources = runOperation(excludeGlob('test/files/*.js'), []).resources;
+      return globbedResources.toArray(function(resources) {
+        resources.length.should.equal(1);
+        resources[0].filename().should.equal('concatenated.js');
+        done();
+      });
+    });
+
+    it('should return a glob that excludes paths based on given pattern arguments', function(done) {
+      var excludeGlob = glob.exclude('test/files/file-1.js', 'test/files/file-2.js');
+      var globbedResources = runOperation(excludeGlob('test/files/*.js'), []).resources;
+      return globbedResources.toArray(function(resources) {
+        resources.length.should.equal(1);
+        resources[0].filename().should.equal('concatenated.js');
+        done();
+      });
+    });
+
+    it('should return a glob that excludes paths based on given pattern array', function(done) {
+      var excludeGlob = glob.exclude(['test/files/file-1.js', 'test/files/file-2.js']);
+      var globbedResources = runOperation(excludeGlob('test/files/*.js'), []).resources;
+      return globbedResources.toArray(function(resources) {
+        resources.length.should.equal(1);
+        resources[0].filename().should.equal('concatenated.js');
+        done();
+      });
+    });
+
+    it('should return a glob that excludes paths based on sequenced exclusion pattern', function(done) {
+      var excludeGlob = glob.
+          exclude('test/files/file-1.js').
+          exclude('test/files/file-2.js');
+      var globbedResources = runOperation(excludeGlob('test/files/*.js'), []).resources;
+      return globbedResources.toArray(function(resources) {
+        resources.length.should.equal(1);
+        resources[0].filename().should.equal('concatenated.js');
+        done();
+      });
+    });
+  });
+
+
   describe('#within', function() {
     it('should be a function', function() {
       glob.within.should.be.a('function');

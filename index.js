@@ -2,6 +2,8 @@ var operation = require('plumber').operation;
 var Supervisor = require('plumber').Supervisor;
 
 var highland = require('highland');
+var Minimatch = require('minimatch').Minimatch;
+var flatten = require('flatten');
 var path = require('path');
 
 
@@ -25,7 +27,21 @@ function uniqueByPath() {
     };
 }
 
-function globOperation(mapper) {
+function asMinimatch(pattern) {
+    return new Minimatch(pattern);
+}
+
+function excludeMatching(excludedPatterns) {
+    var exclusionMatchers = excludedPatterns.map(asMinimatch);
+    return function(resource) {
+        var resPath = resource.path().absolute();
+        return ! exclusionMatchers.some(function(mm) {
+            return mm.match(resPath);
+        });
+    };
+}
+
+function globOperation(mapper, excludedPatterns) {
     // The glob function is an alias for glob.pattern
     function glob(/* patterns... */) {
         return glob.pattern.apply(null, arguments);
@@ -37,19 +53,28 @@ function globOperation(mapper) {
         var supervisor = new Supervisor();
         return operation(function(resources) {
             var glob = supervisor.glob.bind(supervisor);
-            var globbedResources = patternList.map(glob).merge().filter(uniqueByPath());
+            var globbedResources = patternList.
+                map(glob).
+                merge().
+                filter(uniqueByPath()).
+                filter(excludeMatching(excludedPatterns));
             return resources.concat(globbedResources);
         });
+    };
+
+    glob.exclude = function(/* patterns... */) {
+        var excludeList = flatten([].slice.call(arguments)).map(mapper);
+        return globOperation(mapper, excludedPatterns.concat(excludeList));
     };
 
     // recursively compose mappers
     glob.within = function(directory) {
         return globOperation(compose(mapper, function(file) {
             return path.join(directory, file);
-        }));
+        }), excludedPatterns);
     };
 
     return glob;
 };
 
-module.exports = globOperation(identity);
+module.exports = globOperation(identity, []);
