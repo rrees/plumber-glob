@@ -27,6 +27,10 @@ Patterns may include wildcards like `*` or `**` (globstar).
 
 See the [minimatch](https://github.com/isaacs/minimatch) documentation for the full available syntax.
 
+Example:
+
+    var allHtml = glob('**/*.html'); // or glob.pattern('**/*.html')
+
 ### `glob.exclude(patterns...)`
 
 Returns a new `glob` function that excludes files patched by the patterns.
