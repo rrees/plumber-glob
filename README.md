@@ -37,8 +37,8 @@ Returns a new `glob` function that excludes files patched by the patterns.
 
 Example:
 
-    var globNoJs = glob.exclude('*.js');
-    var allButJs = globNoJs("src/*.*");
+    var globUnlessMinimised = glob.exclude('**/*.min.js');
+    var js = globUnlessMinimised("src/**/*.js");
 
 ### `glob.within(directory)`
 
