@@ -17,13 +17,13 @@ describe('glob', function() {
   });
 
 
-  it('should be a function', function() {
-    glob.should.be.a('function');
-  });
-
-
   describe('#pattern', function() {
+
     it('should be a function', function() {
+      glob.pattern.should.be.a('function');
+    });
+
+    it('should return a function', function() {
       glob.pattern('files/*.js').should.be.a('function');
     });
 
@@ -103,7 +103,12 @@ describe('glob', function() {
 
 
   describe('#apply', function() {
+
     it('should be a function', function() {
+      glob.should.be.a('function');
+    });
+
+    it('should return a function', function() {
       glob('files/*.js').should.be.a('function');
     });
 
