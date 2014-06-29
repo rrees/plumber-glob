@@ -1,16 +1,17 @@
 {
   "name": "plumber-glob",
-  "version": "0.3.3",
+  "version": "0.4.0",
   "description": "File globbing operation for Plumber pipelines",
   "main": "index",
   "dependencies": {
-    "plumber": "~0.3.0",
-    "highland": "~1.16.2",
     "minimatch": "~0.2.14",
     "flatten": "0.0.1"
   },
+  "peerDependencies": {
+    "plumber": "^0.4.0"
+  },
   "devDependencies": {
-    "plumber-util-test": "~0.3.0",
+    "plumber-util-test": "~0.4.0",
     "mocha": "~1.16.2",
     "chai": "~1.8.1"
   },
