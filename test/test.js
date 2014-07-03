@@ -1,7 +1,7 @@
 var chai = require('chai');
 var should = chai.should();
 
-var runOperation = require('plumber-util-test').runOperation;
+var runAndCompleteWith = require('plumber-util-test').runAndCompleteWith;
 
 var Resource = require('plumber').Resource;
 var Supervisor = require('plumber/lib/util/supervisor');
@@ -16,6 +16,9 @@ describe('glob', function() {
     supervisor = new Supervisor();
   });
 
+  function resourcesError() {
+    chai.assert(false, "error in resources observable");
+  }
 
   describe('#pattern', function() {
 
@@ -28,8 +31,7 @@ describe('glob', function() {
     });
 
     it('should return all matched resources', function(done) {
-      var globbedResources = runOperation(glob.pattern('test/files/file-*.js'), []).resources;
-      return globbedResources.toArray(function(resources) {
+      runAndCompleteWith(glob.pattern('test/files/file-*.js'), [], function(resources) {
         resources.length.should.equal(2);
         resources[0].filename().should.equal('file-1.js');
         resources[0].data().should.equal('var x = 42;\n');
@@ -39,64 +41,50 @@ describe('glob', function() {
         resources[1].data().should.equal('function nothing() {\n}\n');
         resources[1].type().should.equal('javascript');
         should.not.exist(resources[1].sourceMap());
-        done();
-      });
+      }, resourcesError, done);
     });
 
     it('should return all matched resources with their source map', function(done) {
-      var globbedResources = runOperation(glob.pattern('test/files/concatenated.js'), []).resources;
-      return globbedResources.toArray(function(resources) {
+      runAndCompleteWith(glob.pattern('test/files/concatenated.js'), [], function(resources) {
         resources.length.should.equal(1);
         resources[0].filename().should.equal('concatenated.js');
         resources[0].data().should.equal('/* source */\nvar answer = 42;\nvar added = addOne(answer);\nfunction addOne(number) {\n  return number + 1;\n}\n');
         resources[0].type().should.equal('javascript');
         resources[0].sourceMap().should.be.an('object');
         resources[0].sourceMap().toString().should.deep.equal('{"version":3,"file":"concatenated.js","mappings":"AAAA;AACA;ACDA;AACA;AACA;AACA;AACA","sources":["../1.js","../2.js"],"sourcesContent":["/* source */\\nvar answer = 42;","var added = addOne(answer);\\nfunction addOne(number) {\\n  return number + 1;\\n}\\n"],"names":[]}');
-        done();
-      });
+      }, resourcesError, done);
     });
 
     it('should pass through any input resources and append the globbed resources', function(done) {
       var inputRes = new Resource();
-      var globbedResources = runOperation(glob.pattern('test/files/file-*.js'), [inputRes]).resources;
-      return globbedResources.toArray(function(resources) {
+      runAndCompleteWith(glob.pattern('test/files/file-*.js'), [inputRes], function(resources) {
         resources.length.should.equal(3);
         resources[0].should.equal(inputRes);
-        done();
-      });
+      }, resourcesError, done);
     });
 
     it('should return resources matching all arguments', function(done) {
-      var globbedResources = runOperation(glob.pattern(
-          'test/files/file-1.js',
-          'test/files/file-2.js'
-      ), []).resources;
-      return globbedResources.toArray(function(resources) {
+      runAndCompleteWith(glob.pattern('test/files/file-1.js', 'test/files/file-2.js'),
+                         [],
+                         function(resources) {
         resources.length.should.equal(2);
-        done();
-      });
+      }, resourcesError, done);
     });
 
     it('should return resources matching array arguments', function(done) {
-      var globbedResources = runOperation(glob.pattern([
-          'test/files/file-1.js',
-          'test/files/file-2.js'
-      ]), []).resources;
-      return globbedResources.toArray(function(resources) {
+      runAndCompleteWith(glob.pattern(['test/files/file-1.js', 'test/files/file-2.js']),
+                         [],
+                         function(resources) {
         resources.length.should.equal(2);
-        done();
-      });
+      }, resourcesError, done);
     });
 
     it('should return each matched resource only once', function(done) {
-      var globbedResources = runOperation(glob.pattern(
-          'test/files/file-1.js',
-          'test/files/file-1.js'
-      ), []).resources;
-      return globbedResources.toArray(function(resources) {
+      runAndCompleteWith(glob.pattern(['test/files/file-1.js', 'test/files/file-1.js']),
+                         [],
+                         function(resources) {
         resources.length.should.equal(1);
-        done();
-      });
+      }, resourcesError, done);
     });
 
   });
@@ -113,8 +101,7 @@ describe('glob', function() {
     });
 
     it('should return all matched resources like #pattern', function(done) {
-      var globbedResources = runOperation(glob('test/files/file-*.js'), []).resources;
-      return globbedResources.toArray(function(resources) {
+      runAndCompleteWith(glob('test/files/file-*.js'), [], function(resources) {
         resources.length.should.equal(2);
         resources[0].filename().should.equal('file-1.js');
         resources[0].data().should.equal('var x = 42;\n');
@@ -124,8 +111,7 @@ describe('glob', function() {
         resources[1].data().should.equal('function nothing() {\n}\n');
         resources[1].type().should.equal('javascript');
         should.not.exist(resources[1].sourceMap());
-        done();
-      });
+      }, resourcesError, done);
     });
   });
 
@@ -145,11 +131,9 @@ describe('glob', function() {
 
     it('should match resources within the directories', function(done) {
       var globWithin = glob.within('test').within('files');
-      var globbedResources = runOperation(globWithin('file-*.js'), []).resources;
-      return globbedResources.toArray(function(resources) {
+      runAndCompleteWith(globWithin('file-*.js'), [], function(resources) {
         resources.length.should.equal(2);
-        done();
-      });
+      }, resourcesError, done);
     });
   });
 
@@ -165,44 +149,36 @@ describe('glob', function() {
 
     it('should return a glob that excludes paths based on given pattern', function(done) {
       var excludeGlob = glob.exclude('test/files/file-*.js');
-      var globbedResources = runOperation(excludeGlob('test/files/*.js'), []).resources;
-      return globbedResources.toArray(function(resources) {
+      runAndCompleteWith(excludeGlob('test/files/*.js'), [], function(resources) {
         resources.length.should.equal(1);
         resources[0].filename().should.equal('concatenated.js');
-        done();
-      });
+      }, resourcesError, done);
     });
 
     it('should return a glob that excludes paths based on given pattern arguments', function(done) {
       var excludeGlob = glob.exclude('test/files/file-1.js', 'test/files/file-2.js');
-      var globbedResources = runOperation(excludeGlob('test/files/*.js'), []).resources;
-      return globbedResources.toArray(function(resources) {
+      runAndCompleteWith(excludeGlob('test/files/*.js'), [], function(resources) {
         resources.length.should.equal(1);
         resources[0].filename().should.equal('concatenated.js');
-        done();
-      });
+      }, resourcesError, done);
     });
 
     it('should return a glob that excludes paths based on given pattern array', function(done) {
       var excludeGlob = glob.exclude(['test/files/file-1.js', 'test/files/file-2.js']);
-      var globbedResources = runOperation(excludeGlob('test/files/*.js'), []).resources;
-      return globbedResources.toArray(function(resources) {
+      runAndCompleteWith(excludeGlob('test/files/*.js'), [], function(resources) {
         resources.length.should.equal(1);
         resources[0].filename().should.equal('concatenated.js');
-        done();
-      });
+      }, resourcesError, done);
     });
 
     it('should return a glob that excludes paths based on sequenced exclusion pattern', function(done) {
       var excludeGlob = glob.
           exclude('test/files/file-1.js').
           exclude('test/files/file-2.js');
-      var globbedResources = runOperation(excludeGlob('test/files/*.js'), []).resources;
-      return globbedResources.toArray(function(resources) {
+      runAndCompleteWith(excludeGlob('test/files/*.js'), [], function(resources) {
         resources.length.should.equal(1);
         resources[0].filename().should.equal('concatenated.js');
-        done();
-      });
+      }, resourcesError, done);
     });
 
     it('should return a glob that excludes paths from the current within context', function(done) {
@@ -212,12 +188,10 @@ describe('glob', function() {
           within('files').
           exclude('file-2.js');
 
-      var globbedResources = runOperation(excludeGlob('*.js'), []).resources;
-      return globbedResources.toArray(function(resources) {
+      runAndCompleteWith(excludeGlob('*.js'), [], function(resources) {
         resources.length.should.equal(1);
         resources[0].filename().should.equal('concatenated.js');
-        done();
-      });
+      }, resourcesError, done);
     });
   });
 

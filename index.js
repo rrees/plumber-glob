@@ -1,7 +1,7 @@
 var operation = require('plumber').operation;
 var Supervisor = require('plumber').Supervisor;
+var Rx = require('plumber').Rx;
 
-var highland = require('highland');
 var Minimatch = require('minimatch').Minimatch;
 var flatten = require('flatten');
 var path = require('path');
@@ -48,14 +48,15 @@ function globOperation(mapper, excludedPatterns) {
     };
 
     glob.pattern = function(/* patterns... */) {
-        var patternList = highland([].slice.call(arguments)).flatten().map(mapper);
+        var patterns = flatten([].slice.call(arguments));
+        var patternList = Rx.Observable.fromArray(patterns).map(mapper);
         // FIXME: do we really need the supervisor then?
         var supervisor = new Supervisor();
         return operation(function(resources) {
             var glob = supervisor.glob.bind(supervisor);
             var globbedResources = patternList.
                 map(glob).
-                merge().
+                mergeAll().
                 filter(uniqueByPath()).
                 filter(excludeMatching(excludedPatterns));
             return resources.concat(globbedResources);
