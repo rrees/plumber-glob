@@ -52,14 +52,14 @@ function globOperation(mapper, excludedPatterns) {
         var patternList = Rx.Observable.fromArray(patterns).map(mapper);
         // FIXME: do we really need the supervisor then?
         var supervisor = new Supervisor();
-        return operation(function(resources) {
+        return operation.concatExecutions(function() {
             var glob = supervisor.glob.bind(supervisor);
             var globbedResources = patternList.
                 map(glob).
                 mergeAll().
                 filter(uniqueByPath()).
                 filter(excludeMatching(excludedPatterns));
-            return resources.concat(globbedResources);
+            return Rx.Observable.return(globbedResources);
         });
     };
 
