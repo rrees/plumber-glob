@@ -52,15 +52,52 @@ function globOperation(mapper, excludedPatterns) {
         var patternList = Rx.Observable.fromArray(patterns).map(mapper);
         // FIXME: do we really need the supervisor then?
         var supervisor = new Supervisor();
-        return operation(function(resources) {
-            var glob = supervisor.glob.bind(supervisor);
-            var globbedResources = patternList.
-                map(glob).
-                mergeAll().
-                filter(uniqueByPath()).
-                filter(excludeMatching(excludedPatterns));
-            return resources.concat(globbedResources);
-        });
+        var glob = supervisor.glob.bind(supervisor);
+        // return operation(function(resources) {
+        //     var glob = supervisor.glob.bind(supervisor);
+        //     var globbedResources = patternList.
+        //         map(glob).
+        //         mergeAll().
+        //         filter(uniqueByPath()).
+        //         filter(excludeMatching(excludedPatterns));
+        //     return resources.concat(globbedResources);
+        // });
+
+
+        return function(executions) {
+
+            function load() {
+                var globbedResources = patternList.
+                        map(glob).
+                        mergeAll().
+                        filter(uniqueByPath()).
+                        filter(excludeMatching(excludedPatterns));
+                return globbedResources;
+            }
+
+
+            var watcher = Rx.Observable.defer(function() {
+                var Gaze = require('gaze').Gaze;
+
+                // FIXME: build list from array rather than Observable to
+                // avoid duplicated evaluation on each subscription?
+                var filesChanged = patterns.map(function(pattern) {
+                    console.log("- gaze", pattern)
+                    var gaze = new Gaze(pattern);
+                    return Rx.Observable.fromEvent(gaze, 'all', function(args) {
+                        return {type: args[0], filepath: args[1]};
+                    });
+                });
+
+                // TODO: throttle in case multiple matched files change at once?
+                return Rx.Observable.fromArray(filesChanged).
+                    mergeAll().
+                    map(load);
+            });
+
+            var globber = Rx.Observable.return(load()).concat(watcher)
+            return Rx.Observable.combineLatest(executions, globber, function(a,b){ return a.concat(b) })
+        };
     };
 
     glob.exclude = function(/* patterns... */) {
