@@ -9,7 +9,7 @@
     "gaze": "~0.6.4"
   },
   "peerDependencies": {
-    "plumber": "^0.4.0"
+    "plumber": "^0.4.4"
   },
   "devDependencies": {
     "plumber-util-test": "~0.4.0",
