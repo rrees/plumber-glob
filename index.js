@@ -5,6 +5,7 @@ var Rx = require('plumber').Rx;
 var Minimatch = require('minimatch').Minimatch;
 var flatten = require('flatten');
 var path = require('path');
+var Gaze = require('gaze').Gaze;
 
 
 function identity(x){ return x; }
@@ -31,6 +32,14 @@ function asMinimatch(pattern) {
     return new Minimatch(pattern);
 }
 
+
+// Returns an Observable of events for the gazed patterns
+function gazeObservable(patterns) {
+    var gazer = new Gaze(patterns);
+    return Rx.Observable.fromEvent(gazer, 'all');
+}
+
+
 function excludeMatching(excludedPatterns) {
     var exclusionMatchers = excludedPatterns.map(asMinimatch);
     return function(resource) {
@@ -48,18 +57,27 @@ function globOperation(mapper, excludedPatterns) {
     };
 
     glob.pattern = function(/* patterns... */) {
-        var patterns = flatten([].slice.call(arguments));
-        var patternList = Rx.Observable.fromArray(patterns).map(mapper);
+        var patterns = flatten([].slice.call(arguments)).map(mapper);
         // FIXME: do we really need the supervisor then?
         var supervisor = new Supervisor();
-        return operation.concatExecutions(function() {
-            var glob = supervisor.glob.bind(supervisor);
-            var globbedResources = patternList.
+        // TODO: glob here, though how to make Resource from data?
+        var glob = supervisor.glob.bind(supervisor);
+
+        function globResources() {
+            return Rx.Observable.fromArray(patterns).
                 map(glob).
                 mergeAll().
                 filter(uniqueByPath()).
                 filter(excludeMatching(excludedPatterns));
-            return Rx.Observable.return(globbedResources);
+        }
+
+        // TODO: or new upstream operation? merge instead of concat?
+        return operation.concatExecutions(function() {
+            // TODO: gaze in supervisor
+            var changes = gazeObservable(patterns);
+            var gazedResources = changes.map(globResources);
+
+            return Rx.Observable.return(globResources()).concat(gazedResources);
         });
     };
 
