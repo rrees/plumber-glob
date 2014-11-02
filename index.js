@@ -74,7 +74,8 @@ function globOperation(mapper, excludedPatterns) {
         // TODO: or new upstream operation? merge instead of concat?
         return operation.concatExecutions(function() {
             // TODO: gaze in supervisor
-            var changes = gazeObservable(patterns);
+            // Throttle to batch simultaneous changes
+            var changes = gazeObservable(patterns).throttle(10);
             var gazedResources = changes.map(globResources);
 
             return Rx.Observable.return(globResources()).concat(gazedResources);
