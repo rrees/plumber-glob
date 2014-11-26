@@ -32,11 +32,38 @@ function asMinimatch(pattern) {
     return new Minimatch(pattern);
 }
 
+function asAbsolutePath(relativePath) {
+    return path.resolve(relativePath);
+}
+
 
 // Returns an Observable of events for the gazed patterns
 function gazeObservable(patterns) {
     var gazer = new Gaze(patterns);
-    return Rx.Observable.fromEvent(gazer, 'all');
+    var gazeObs = Rx.Observable.create(function(observer) {
+        gazer.on('all', function(event, file) {
+            observer.onNext(file);
+        });
+
+        gazer.on('end', observer.onCompleted);
+
+        return gazer.close;
+    });
+
+    /* Gazing multiple patterns is actually completely broken in Gaze
+     * 0.6 as all gazes fire if any of the watched patterns match:
+     *
+     *   https://github.com/shama/gaze/issues/104
+     *
+     * The workaround is to check whether the event is for a file that
+     * matches our pattern here.  Tedious, but necessary.
+     */
+    var patternMatchers = patterns.map(asAbsolutePath).map(asMinimatch);
+    return gazeObs.filter(function(file) {
+        return patternMatchers.some(function(mm) {
+            return mm.match(file);
+        });
+    });
 }
 
 
