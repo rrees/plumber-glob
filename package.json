@@ -1,6 +1,6 @@
 {
   "name": "plumber-glob",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "description": "File globbing operation for Plumber pipelines",
   "main": "index",
   "dependencies": {
