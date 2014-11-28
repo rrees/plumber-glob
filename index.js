@@ -47,7 +47,9 @@ function gazeObservable(patterns) {
 
         gazer.on('end', observer.onCompleted);
 
-        return gazer.close;
+        // Don't pass any arguments to close() as it has undocumented
+        // broken behaviours if you do
+        return function(){ gazer.close(); };
     });
 
     /* Gazing multiple patterns is actually completely broken in Gaze
