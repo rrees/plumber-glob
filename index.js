@@ -45,7 +45,9 @@ function gazeObservable(patterns) {
             observer.onNext(file);
         });
 
-        gazer.on('end', observer.onCompleted);
+        gazer.on('end', function() {
+            observer.onCompleted();
+        });
 
         // Don't pass any arguments to close() as it has undocumented
         // broken behaviours if you do
