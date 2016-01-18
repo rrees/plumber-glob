@@ -5,7 +5,7 @@ var Rx = require('plumber').Rx;
 var Minimatch = require('minimatch').Minimatch;
 var flatten = require('flatten');
 var path = require('path');
-var Gaze = require('gaze').Gaze;
+var fsWatch = require('chokidar');
 
 
 function identity(x){ return x; }
@@ -39,13 +39,15 @@ function asAbsolutePath(relativePath) {
 
 // Returns an Observable of events for the gazed patterns
 function gazeObservable(patterns) {
-    var gazer = new Gaze(patterns);
+    var gazer = fsWatch.watch(patterns);
     var gazeObs = Rx.Observable.create(function(observer) {
-        gazer.on('all', function(event, file) {
-            observer.onNext(file);
+        gazer.on('all', function(event, path) {
+            observer.onNext(path);
+            console.log(path);
         });
 
         gazer.on('end', function() {
+            console.log('Watch ended');
             observer.onCompleted();
         });
 

@@ -31,7 +31,7 @@ describe('glob', function() {
     });
 
     it('should return all matched resources', function(done) {
-      runAndCompleteWith(glob.pattern('test/files/file-*.js'), [], function(resources) {
+      runAndCompleteWith('test/files/file-*.js', [], function(resources) {
         resources.length.should.equal(2);
         resources[0].filename().should.equal('file-1.js');
         resources[0].data().should.equal('var x = 42;\n');
